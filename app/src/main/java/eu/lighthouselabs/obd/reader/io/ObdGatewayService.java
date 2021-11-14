@@ -337,20 +337,21 @@ public class ObdGatewayService extends Service {
 	 */
 	private void showNotification() {
 		// Set the icon, scrolling text and timestamp
-		Notification notification = new Notification(R.drawable.icon,
-		        getText(R.string.service_started), System.currentTimeMillis());
+		Notification.Builder notification = new Notification.Builder(this);
+		notification.setSmallIcon(R.drawable.icon);
+		notification.setTicker(getText(R.string.service_started));
+		notification.setWhen(System.currentTimeMillis());
 
 		// Launch our activity if the user selects this notification
 		PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
 		        new Intent(this, MainActivity.class), 0);
 
 		// Set the info for the views that show in the notification panel.
-		notification.setLatestEventInfo(this,
-		        getText(R.string.notification_label),
-		        getText(R.string.service_started), contentIntent);
-
+		notification.setContentTitle(getText(R.string.notification_label));
+		notification.setContentText(getText(R.string.service_started));
+		notification.setContentIntent(contentIntent);
 		// Send the notification.
-		_notifManager.notify(R.string.service_started, notification);
+		_notifManager.notify(124, notification.build());
 	}
 
 	/**
