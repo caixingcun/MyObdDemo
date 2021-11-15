@@ -5,11 +5,13 @@ package eu.lighthouselabs.obd.commands.utils;
 
 /**
  * Misc utilities
+ * 机油类型转换工具
+ * 值转换为名称
  */
 public final class ObdUtils {
 
 	/**
-	 * @param an integer value
+	 * @param value integer value
 	 * @return the equivalent FuelType name.
 	 */
 	public final static String getFuelTypeName(int value) {

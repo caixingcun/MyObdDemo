@@ -6,7 +6,8 @@ package eu.lighthouselabs.obd.commands;
 import eu.lighthouselabs.obd.enums.AvailableCommandNames;
 
 /**
- * TODO put description
+ * 车速检测
+ *  01 0D  ： 公里/小时
  * 
  * Current speed.
  */

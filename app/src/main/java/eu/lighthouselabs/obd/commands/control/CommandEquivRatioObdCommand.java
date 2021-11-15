@@ -16,6 +16,7 @@ import eu.lighthouselabs.obd.enums.AvailableCommandNames;
  * stoichiometric is 14.64:1 ratio. If the fuel control system was commanded an
  * equivalence ratio of 0.95, the commanded A/F ratio to the engine would be
  * 14.64 * 0.95 = 13.9 A/F.
+ * 01 44
  */
 public class CommandEquivRatioObdCommand extends ObdCommand {
 
@@ -52,6 +53,7 @@ public class CommandEquivRatioObdCommand extends ObdCommand {
 			int a = buffer.get(2);
 			int b = buffer.get(3);
 			ratio = (a * 256 + b) / 32768;
+
 			res = String.format("%.1f%s", ratio, "%");
 		}
 

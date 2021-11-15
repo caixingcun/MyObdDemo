@@ -9,6 +9,8 @@ import eu.lighthouselabs.obd.enums.AvailableCommandNames;
 
 /**
  * Calculated Engine Load value.
+ * 01 04
+ * 发动机负荷
  */
 public class EngineLoadObdCommand extends PercentageObdCommand {
 

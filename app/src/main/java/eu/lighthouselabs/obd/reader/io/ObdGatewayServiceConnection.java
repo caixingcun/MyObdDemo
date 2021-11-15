@@ -44,8 +44,7 @@ public class ObdGatewayServiceConnection implements ServiceConnection {
 	/**
 	 * Queue JobObdCommand.
 	 * 
-	 * @param the
-	 *            job
+	 * @param job
 	 */
 	public void addJobToQueue(ObdCommandJob job) {
 		if (null != _service)

@@ -4,7 +4,7 @@
 package eu.lighthouselabs.obd.enums;
 
 /**
- * TODO put description
+ * 可用命令名称
  */
 public enum AvailableCommandNames {
 	AIR_INTAKE_TEMP("Air Intake Temperature"),

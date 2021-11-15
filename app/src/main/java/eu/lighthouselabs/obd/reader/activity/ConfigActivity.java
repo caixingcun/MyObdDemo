@@ -48,11 +48,13 @@ public class ConfigActivity extends PreferenceActivity implements
 
 		/*
 		 * Read preferences resources available at res/xml/preferences.xml
+		 * 添加布局 类似于 setContent
 		 */
 		addPreferencesFromResource(R.xml.preferences);
 
 		ArrayList<CharSequence> pairedDeviceStrings = new ArrayList<CharSequence>();
 		ArrayList<CharSequence> vals = new ArrayList<CharSequence>();
+		// 从sp BLUETOOTH_LIST_KEY 获取数据
 		ListPreference listBtDevices = (ListPreference) getPreferenceScreen()
 				.findPreference(BLUETOOTH_LIST_KEY);
 		String[] prefKeys = new String[] { ENGINE_DISPLACEMENT_KEY,

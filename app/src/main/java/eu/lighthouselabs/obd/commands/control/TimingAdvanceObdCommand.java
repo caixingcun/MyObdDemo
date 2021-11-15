@@ -7,8 +7,8 @@ import eu.lighthouselabs.obd.commands.PercentageObdCommand;
 import eu.lighthouselabs.obd.enums.AvailableCommandNames;
 
 /**
- * TODO put description
- * 
+ * 时间提前
+ * 01 0E
  * Timing Advance
  */
 public class TimingAdvanceObdCommand extends PercentageObdCommand {

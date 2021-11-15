@@ -9,7 +9,8 @@
 			android:defaultValue="false"
 			android:title="Enable Data Upload"
 			android:summaryOff="Disable http data upload"
-			android:summaryOn="Enable http data upload" android:dialogTitle="Enable Data Upload" android:enabled="false"/>
+			android:summaryOn="Enable http data upload"
+			android:dialogTitle="Enable Data Upload" android:enabled="false"/>
 
         <EditTextPreference
             android:key="upload_url_preference"

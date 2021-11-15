@@ -7,7 +7,8 @@ import eu.lighthouselabs.obd.commands.ObdCommand;
 import eu.lighthouselabs.obd.enums.AvailableCommandNames;
 
 /**
- * TODO put description
+ * 空气传感器 空气流量 MAF
+ * 01 10
  * 
  * Mass Air Flow
  */

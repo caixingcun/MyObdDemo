@@ -7,7 +7,8 @@ import eu.lighthouselabs.obd.commands.PercentageObdCommand;
 import eu.lighthouselabs.obd.enums.AvailableCommandNames;
 
 /**
- * Read the throttle position in percentage.
+ * 油门位置
+ * 01 11
  */
 public class ThrottlePositionObdCommand extends PercentageObdCommand {
 

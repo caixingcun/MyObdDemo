@@ -5,6 +5,7 @@ package eu.lighthouselabs.obd.enums;
 
 /**
  * All OBD protocols.
+ * obd协议
  */
 public enum ObdProtocols {
 

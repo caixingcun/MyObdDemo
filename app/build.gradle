@@ -1,7 +1,7 @@
 apply plugin:'com.android.application'
 apply plugin:'kotlin-android'
 android {
-    compileSdk 30
+    compileSdk 28
     useLibrary 'org.apache.http.legacy'
     defaultConfig {
         applicationId "eu.lighthouselabs.obd.reader"

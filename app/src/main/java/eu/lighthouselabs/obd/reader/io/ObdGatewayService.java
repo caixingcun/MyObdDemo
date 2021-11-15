@@ -53,16 +53,38 @@ public class ObdGatewayService extends Service {
 
 	private static final String TAG = "ObdGatewayService";
 
-	private IPostListener _callback = null;
-	private final Binder _binder = new LocalBinder();
-	private AtomicBoolean _isRunning = new AtomicBoolean(false);
 	private NotificationManager _notifManager;
-
+	/**
+	 * 对外回调，返回当前执行的任务 出去
+	 */
+	private IPostListener _callback = null;
+	/**
+	 * 外部可调用接口
+	 */
+	private final Binder _binder = new LocalBinder();
+	/**
+	 * 服务是否运行 flag
+	 */
+	private AtomicBoolean _isRunning = new AtomicBoolean(false);
+	/**
+	 * 任务队列
+	 */
 	private BlockingQueue<ObdCommandJob> _queue = new LinkedBlockingQueue<ObdCommandJob>();
+	/**
+	 * 当前队列是否执行中 flag
+	 */
 	private AtomicBoolean _isQueueRunning = new AtomicBoolean(false);
+	/**
+	 * 队列计数器
+	 */
 	private Long _queueCounter = 0L;
-
+	/**
+	 * 蓝牙设备
+	 */
 	private BluetoothDevice _dev = null;
+	/**
+	 * 蓝牙 socket
+	 */
 	private BluetoothSocket _sock = null;
 	/*
 	 * http://developer.android.com/reference/android/bluetooth/BluetoothDevice.html
@@ -72,6 +94,8 @@ public class ObdGatewayService extends Service {
 	 * the well-known SPP UUID 00001101-0000-1000-8000-00805F9B34FB. However if
 	 * you are connecting to an Android peer then please generate your own
 	 * unique UUID."
+	 * 连接蓝牙串口版 使用下面的uuid
+	 * 如果连接 Android设备 需要自己生成uuid
 	 */
 	private static final UUID MY_UUID = UUID
 	        .fromString("00001101-0000-1000-8000-00805F9B34FB");
@@ -123,6 +147,7 @@ public class ObdGatewayService extends Service {
 
 		/*
 		 * Let's get the remote Bluetooth device
+		 * 从sp获取 蓝牙设备id
 		 */
 		String remoteDevice = prefs.getString(
 		        ConfigActivity.BLUETOOTH_LIST_KEY, null);
@@ -136,8 +161,9 @@ public class ObdGatewayService extends Service {
 			// TODO kill this service gracefully
 			stopService();
 		}
-
+		//获取蓝牙适配器
 		final BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
+		//根据设备Id获取蓝牙设备
 		_dev = btAdapter.getRemoteDevice(remoteDevice);
 
 		/*
@@ -190,6 +216,7 @@ public class ObdGatewayService extends Service {
 		Toast.makeText(this, "Starting OBD connection..", Toast.LENGTH_SHORT);
 
 		try {
+			//开启OBD蓝牙连接
 			startObdConnection();
 		} catch (Exception e) {
 			Log.e(TAG, "建立连接时出错 -> "
@@ -202,19 +229,23 @@ public class ObdGatewayService extends Service {
 
 	/**
 	 * Start and configure the connection to the OBD interface.
-	 * 
+	 * 开启OBD连接 ，主要是蓝牙连接 及 部分OBD命令初始化
 	 * @throws java.io.IOException
 	 */
 	private void startObdConnection() throws IOException {
 		Log.d(TAG, "开始OBD连接..");
 
 		// Instantiate a BluetoothSocket for the remote device and connect it.
+		// 开启蓝牙通信连接 获取输出流
 		_sock = _dev.createRfcommSocketToServiceRecord(MY_UUID);
 		_sock.connect();
 
 		// Let's configure the connection.
 		Log.d(TAG, "配置连接任务排队..");
+		//执行命令
+		// AT Z : 复位
 		queueJob(new ObdCommandJob(new ObdResetCommand()));
+		// AT E0 : 关闭回传
 		queueJob(new ObdCommandJob(new EchoOffObdCommand()));
 
 		/*
@@ -223,15 +254,18 @@ public class ObdGatewayService extends Service {
 		 * TODO this can be done w/o having to queue jobs by just issuing
 		 * command.run(), command.getResult() and validate the result.
 		 */
+		// AT E0 : 关闭回传
 		queueJob(new ObdCommandJob(new EchoOffObdCommand()));
+		// AT L0 : 关闭信息后自动加 0x0A
 		queueJob(new ObdCommandJob(new LineFeedOffObdCommand()));
+		// AT ST 0x62 : 设置ECU返回超时时间62
 		queueJob(new ObdCommandJob(new TimeoutObdCommand(62)));
 
-		// For now set protocol to AUTO
+		// AT SP 0 : 设置当前协议，自动搜索并保存
 		queueJob(new ObdCommandJob(new SelectProtocolObdCommand(
 		        ObdProtocols.AUTO)));
 		
-		// Job for returning dummy data
+		// 01 46 : 环境空气温度任务执行
 		queueJob(new ObdCommandJob(new AmbientAirTemperatureObdCommand()));
 
 		Log.d(TAG, "初始化任务队列.");
@@ -248,7 +282,7 @@ public class ObdGatewayService extends Service {
 	 */
 	private void _executeQueue() {
 		Log.d(TAG, "执行队列..");
-
+		//设置队列标志位
 		_isQueueRunning.set(true);
 
 		while (!_queue.isEmpty()) {
@@ -288,7 +322,7 @@ public class ObdGatewayService extends Service {
 	/**
 	 * This method will add a job to the queue while setting its ID to the
 	 * internal queue counter.
-	 * 
+	 * 将任务加进队列  任务id 位队列计数
 	 * @param job
 	 * @return
 	 */
@@ -362,21 +396,36 @@ public class ObdGatewayService extends Service {
 	}
 
 	/**
-	 * TODO put description
+	 * IBinder 对外接口
 	 */
 	public class LocalBinder extends Binder implements IPostMonitor {
+		/**
+		 * 设置任务回调
+		 * @param callback
+		 */
 		public void setListener(IPostListener callback) {
 			_callback = callback;
 		}
 
+		/**
+		 * 查询当前运行状态
+		 * @return
+		 */
 		public boolean isRunning() {
 			return _isRunning.get();
 		}
 
+		/**
+		 * 开启队列任务处理
+		 */
 		public void executeQueue() {
 			_executeQueue();
 		}
 
+		/**
+		 * 添加新任务到队列
+		 * @param job obd任务
+		 */
 		public void addJobToQueue(ObdCommandJob job) {
 			Log.d(TAG, "Adding job [" + job.getCommand().getName() + "] to queue.");
 			_queue.add(job);

@@ -8,6 +8,7 @@ import eu.lighthouselabs.obd.commands.utils.ObdUtils;
 /**
  * MODE 1 PID 0x51 will return one of the following values to identify the fuel
  * type of the vehicle.
+ * 燃料种类  0151 查询
  */
 public enum FuelType {
 	GASOLINE(0x01),

@@ -5,6 +5,12 @@ package eu.lighthouselabs.obd.enums;
 
 /**
  * Select one of the Fuel Trim percentage banks to access.
+ * 燃油修正 0106 查询
+ *
+ * 短期燃油修正表1
+ * 长期燃油修正表1
+ * 短期燃油修正表2
+ * 长期燃油修正表2
  */
 public enum FuelTrim {
 

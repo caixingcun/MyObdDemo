@@ -12,6 +12,8 @@ import eu.lighthouselabs.obd.enums.AvailableCommandNames;
  * getTotalAvailableCodes().
  * 
  * If none are available (totalCodes < 1), don't instantiate this command.
+ * 错误码
+ * 03
  */
 public class TroubleCodesObdCommand extends ObdCommand {
 

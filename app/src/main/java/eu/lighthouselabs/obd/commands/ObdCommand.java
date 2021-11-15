@@ -10,18 +10,26 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 
 /**
- * TODO put description
+ * obd命令抽象类
  */
 public abstract class ObdCommand {
-
+	/**
+	 * 缓冲区
+	 */
 	protected ArrayList<Integer> buffer = null;
+	/**
+	 * 命令
+	 */
 	protected String cmd = null;
 	protected boolean useImperialUnits = false;
+	/**
+	 * 返回数据
+	 */
 	protected String rawData = null;
 
 	/**
 	 * Default ctor to use
-	 * 
+	 * 继承类 super父类构造 传入 命令，建立缓冲区
 	 * @param command
 	 *            the command to send
 	 */
@@ -38,7 +46,7 @@ public abstract class ObdCommand {
 
 	/**
 	 * Copy ctor.
-	 * 
+	 * 支持传入 ObdCmd 类型
 	 * @param other
 	 *            the ObdCommand to copy.
 	 */
@@ -63,8 +71,8 @@ public abstract class ObdCommand {
 	 * This method may be overriden in subclasses, such as ObMultiCommand or
 	 * TroubleCodesObdCommand.
 	 * 
-	 * @param cmd
-	 *            The command to send.
+	 * @param out 输出流
+	 *  The command to send.
 	 */
 	protected void sendCommand(OutputStream out) throws IOException,
 			InterruptedException {
@@ -88,7 +96,7 @@ public abstract class ObdCommand {
 
 	/**
 	 * Resends this command.
-	 * 
+	 * 重新发送
 	 * 
 	 */
 	protected void resendCommand(OutputStream out) throws IOException,
@@ -108,8 +116,8 @@ public abstract class ObdCommand {
 
 	/**
 	 * Reads the OBD-II response.
-	 * 
 	 * This method may be overriden in subclasses, such as ObdMultiCommand.
+	 * 从输入流读取数据 到 rowData
 	 */
 	protected void readResult(InputStream in) throws IOException {
 		byte b = 0;
@@ -135,6 +143,7 @@ public abstract class ObdCommand {
 		buffer.clear();
 
 		// read string each two chars
+		// 双指针 每次读取两个字符作为一个字节 添加 0x 作为16进制数 添加到缓冲区
 		int begin = 0;
 		int end = 2;
 		while (end <= rawData.length()) {
@@ -147,6 +156,7 @@ public abstract class ObdCommand {
 
 	/**
 	 * @return the raw command response in string representation.
+	 * 包含搜索中或者DATA 文字的标识无数据，其他的正常返回 rawData
 	 */
 	public String getResult() {
 		if (rawData.contains("SEARCHING") || rawData.contains("DATA")) {

@@ -22,7 +22,10 @@ public class FuelEconomyWithMAFObdCommand {
 	double litersPer100Km = -1;
 
 	/**
-	 * @param command
+	 * @param fuelType 燃料类型
+	 * @param speed 车速
+	 * @param maf 空气流量
+	 * @param ltft 燃料修正
 	 */
 	public FuelEconomyWithMAFObdCommand(FuelType fuelType, int speed,
 			double maf, float ltft, boolean useImperial) {

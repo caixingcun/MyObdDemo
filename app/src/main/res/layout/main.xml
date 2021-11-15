@@ -38,7 +38,7 @@
             android:background="#dddddd">
         <TableRow
                 android:layout_margin="2dip"
-                android:background="#000000">
+                android:background="#ffffff">
             <ImageView
                     android:src="@drawable/mpg"
                     android:layout_gravity="top|left"/>
@@ -65,7 +65,7 @@
             android:background="#dddddd">
         <TableRow
                 android:layout_margin="2dip"
-                android:background="#000000">
+                android:background="#ffffff">
             <eu.lighthouselabs.obd.reader.drawable.CoolantGaugeView
                     android:layout_width="330px"
                     android:id="@+id/coolant_gauge"
@@ -106,7 +106,7 @@
             android:background="#dddddd">
         <TableRow
                 android:layout_margin="2dip"
-                android:background="#000000">
+                android:background="#ffffff">
             <TextView
                     android:id="@+id/inst_fuel_econ_text"
                     android:text="0l/100km"/>

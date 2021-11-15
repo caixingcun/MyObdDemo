@@ -13,6 +13,7 @@ import eu.lighthouselabs.obd.enums.AvailableCommandNames;
  * Perhaps in the future we'll extend this to read the 3rd, 4th and 5th bytes of
  * the response in order to store information about the availability and
  * completeness of certain on-board tests.
+ * 01 01
  */
 public class DtcNumberObdCommand extends ObdCommand {
 

@@ -8,6 +8,8 @@ import eu.lighthouselabs.obd.enums.AvailableCommandNames;
 
 /**
  * Displays the current engine revolutions per minute (RPM).
+ * 01 0C
+ * 发动机 引擎速度 RPM rate per min
  */
 public class EngineRPMObdCommand extends ObdCommand {
 	

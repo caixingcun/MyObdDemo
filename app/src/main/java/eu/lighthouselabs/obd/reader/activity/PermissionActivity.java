@@ -26,6 +26,7 @@ public class PermissionActivity extends AppCompatActivity {
             }
         }
         startActivity(new Intent(PermissionActivity.this, MainActivity.class));
+        finish();
     });
 
     @Override

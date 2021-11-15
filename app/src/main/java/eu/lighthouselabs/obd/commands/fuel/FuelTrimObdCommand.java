@@ -8,7 +8,7 @@ import eu.lighthouselabs.obd.enums.FuelTrim;
 
 /**
  * Get Fuel Trim.
- * 
+ * 燃油修整
  */
 public class FuelTrimObdCommand extends ObdCommand {
 

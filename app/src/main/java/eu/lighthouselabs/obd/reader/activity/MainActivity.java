@@ -62,47 +62,97 @@ import eu.lighthouselabs.obd.reader.io.ObdGatewayServiceConnection;
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
-
-    /*
-     * TODO put description
+    /**
+     * 无蓝牙id flag
      */
     static final int NO_BLUETOOTH_ID = 0;
+    /**
+     * 蓝牙不可用 flag
+     */
     static final int BLUETOOTH_DISABLED = 1;
+    /**
+     * 无 gps id
+     */
     static final int NO_GPS_ID = 2;
-    static final int START_LIVE_DATA = 3;
-    static final int STOP_LIVE_DATA = 4;
-    static final int SETTINGS = 5;
-    static final int COMMAND_ACTIVITY = 6;
-    static final int TABLE_ROW_MARGIN = 7;
+
+    /**
+     * 无方向传感器 flag
+     */
     static final int NO_ORIENTATION_SENSOR = 8;
+
+
+
+    /**
+     * 开启实时数据 menu id
+     */
+    static final int START_LIVE_DATA = 3;
+    /**
+     * 关闭实时数据 menu id
+     */
+    static final int STOP_LIVE_DATA = 4;
+    /**
+     * 设置 menu id
+     */
+    static final int SETTINGS = 5;
+    /**
+     * command activity menu id
+     */
+    static final int COMMAND_ACTIVITY = 6;
+
 
     private Handler mHandler = new Handler();
 
     /**
      * Callback for ObdGatewayService to update UI.
+     * 通过返回参数获取job 及job结果 进行页面显示
      */
     private IPostListener mListener = null;
+    /**
+     * ObdGatewayService Intent
+     */
     private Intent mServiceIntent = null;
+    /**
+     * bind ObdGatewayService 时 的connection
+     * connection 会持有 IBind对象，可以操作 service
+     * UI借助connection引用操作 service
+     */
     private ObdGatewayServiceConnection mServiceConnection = null;
-
+    /**
+     * 传感器管理器
+     */
     private SensorManager sensorManager = null;
+    /**
+     * 方向传感器
+     */
     private Sensor orientSensor = null;
+    /**
+     * sp
+     */
     private SharedPreferences prefs = null;
-
+    /**
+     * 电源管理器
+     */
     private PowerManager powerManager = null;
     private PowerManager.WakeLock wakeLock = null;
 
     private boolean preRequisites = true;
-
+    /**
+     * 车速
+     */
     private int speed = 1;
+    /**
+     * 空气流量 mass air flow
+     */
     private double maf = 1;
+    /**
+     * 燃油修正
+     */
     private float ltft = 0;
     private double equivRatio = 1;
 
     private EditText commandText;
     private TextView resultText;
     private Button sendButton;
-    private boolean hasPermission = false;
 
     private final SensorEventListener orientListener = new SensorEventListener() {
         public void onSensorChanged(SensorEvent event) {
@@ -141,8 +191,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-
-
 
 
     @Override
@@ -281,9 +329,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         Log.d(TAG, "Pausing..");
-        if (hasPermission) {
-            releaseWakeLockIfHeld();
-        }
+        releaseWakeLockIfHeld();
     }
 
     /**
@@ -298,17 +344,14 @@ public class MainActivity extends AppCompatActivity {
     @SuppressLint("InvalidWakeLockTag")
     protected void onResume() {
         super.onResume();
-
         Log.d(TAG, "Resuming..");
-        if (hasPermission) {
+        sensorManager.registerListener(orientListener, orientSensor,
+                SensorManager.SENSOR_DELAY_UI);
+        prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        wakeLock = powerManager.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK,
+                "ObdReader");
 
-            sensorManager.registerListener(orientListener, orientSensor,
-                    SensorManager.SENSOR_DELAY_UI);
-            prefs = PreferenceManager.getDefaultSharedPreferences(this);
-            powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
-            wakeLock = powerManager.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK,
-                    "ObdReader");
-        }
     }
 
     private void updateConfig() {
@@ -427,8 +470,8 @@ public class MainActivity extends AppCompatActivity {
         TableRow tr = new TableRow(this);
         MarginLayoutParams params = new MarginLayoutParams(
                 LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-        params.setMargins(TABLE_ROW_MARGIN, TABLE_ROW_MARGIN, TABLE_ROW_MARGIN,
-                TABLE_ROW_MARGIN);
+        params.setMargins(7, 7, 7,
+                7);
         tr.setLayoutParams(params);
         tr.setBackgroundColor(Color.BLACK);
         TextView name = new TextView(this);
@@ -452,7 +495,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     *
+     * 每2秒 执行 燃料
      */
     private Runnable mQueueCommands = new Runnable() {
         public void run() {
@@ -461,6 +504,7 @@ public class MainActivity extends AppCompatActivity {
              */
             Log.d(TAG, "SPD:" + speed + ", MAF:" + maf + ", LTFT:" + ltft);
             if (speed > 1 && maf > 1 && ltft != 0) {
+                // 百公里油耗 单位 L/100km
                 FuelEconomyWithMAFObdCommand fuelEconCmd = new FuelEconomyWithMAFObdCommand(
                         FuelType.DIESEL, speed, maf, ltft, false /* TODO */);
                 TextView tvMpg = (TextView) findViewById(R.id.fuel_econ_text);
@@ -478,9 +522,10 @@ public class MainActivity extends AppCompatActivity {
     };
 
     /**
-     *
+     * 执行obd 命令
      */
     private void queueCommands() {
+        //
         final ObdCommandJob airTemp = new ObdCommandJob(
                 new AmbientAirTemperatureObdCommand());
         final ObdCommandJob speed = new ObdCommandJob(new SpeedObdCommand());

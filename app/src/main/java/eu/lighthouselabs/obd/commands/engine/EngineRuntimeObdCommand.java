@@ -7,7 +7,8 @@ import eu.lighthouselabs.obd.commands.ObdCommand;
 import eu.lighthouselabs.obd.enums.AvailableCommandNames;
 
 /**
- * TODO put description
+ * 发动机启动后运行时间
+ * 01 1F
  */
 public class EngineRuntimeObdCommand extends ObdCommand {
 
