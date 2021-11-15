@@ -143,17 +143,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    ActivityResultLauncher<String[]> launcher = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
-        for (Map.Entry<String, Boolean> entry : result.entrySet()) {
-            if (!entry.getValue()) {
-                hasPermission = true;
-                Toast.makeText(MainActivity.this, "请同意权限", Toast.LENGTH_LONG).show();
-                return;
-            }
-            hasPermission = false;
-            initTask();
-        }
-    });
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -170,25 +160,7 @@ public class MainActivity extends AppCompatActivity {
         commandText = (EditText) this.findViewById(R.id.commandText);
         resultText = (TextView) this.findViewById(R.id.resultText);
         sendButton = (Button) this.findViewById(R.id.sendButton);
-
-
-        String[] permissions = {
-                Manifest.permission.ACCESS_COARSE_LOCATION,
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.BLUETOOTH,
-                Manifest.permission.BLUETOOTH_ADMIN,
-                Manifest.permission.BLUETOOTH_ADMIN,
-                Manifest.permission.BLUETOOTH_ADMIN,
-                Manifest.permission.CONTROL_LOCATION_UPDATES,
-                Manifest.permission.WAKE_LOCK,
-
-        };
-        mHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                launcher.launch(permissions);
-            }
-        }, 2000);
+        initTask();
     }
 
     private void initTask() {
