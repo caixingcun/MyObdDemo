@@ -59,7 +59,7 @@ import eu.lighthouselabs.obd.reader.io.ObdGatewayServiceConnection;
 /**
  * The main activity.
  */
-public class MainActivity extends AppCompatActivity {
+public class ObdActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
     /**

@@ -38,7 +38,7 @@ import eu.lighthouselabs.obd.reader.IPostListener;
 import eu.lighthouselabs.obd.reader.IPostMonitor;
 import eu.lighthouselabs.obd.reader.R;
 import eu.lighthouselabs.obd.reader.activity.ConfigActivity;
-import eu.lighthouselabs.obd.reader.activity.MainActivity;
+import eu.lighthouselabs.obd.reader.activity.ObdActivity;
 import eu.lighthouselabs.obd.reader.io.ObdCommandJob.ObdCommandJobState;
 
 /**
@@ -378,7 +378,7 @@ public class ObdGatewayService extends Service {
 
 		// Launch our activity if the user selects this notification
 		PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
-		        new Intent(this, MainActivity.class), 0);
+		        new Intent(this, ObdActivity.class), 0);
 
 		// Set the info for the views that show in the notification panel.
 		notification.setContentTitle(getText(R.string.notification_label));
