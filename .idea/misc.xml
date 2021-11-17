@@ -3,9 +3,11 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
-        <entry key="..\:/Android/MyObdDemo/app/src/main/res/layout/activity_blue_booth.xml" value="0.21875" />
-        <entry key="..\:/Android/MyObdDemo/app/src/main/res/layout/activity_permission.xml" value="0.2803442028985507" />
         <entry key="..\:/Android/MyObdDemo/app/src/main/res/layout/main.xml" value="0.67" />
+        <entry key="..\:/Android/work/MyObdDemo/app/src/main/res/layout/activity_blue_booth.xml" value="0.23802083333333332" />
+        <entry key="..\:/Android/work/MyObdDemo/app/src/main/res/layout/item_simple.xml" value="0.23802083333333332" />
+        <entry key="..\:/Android/work/MyObdDemo/app/src/main/res/layout/main.xml" value="0.25364583333333335" />
+        <entry key="..\:/Android/work/MyObdDemo/app/src/main/res/xml/preferences.xml" value="0.23802083333333332" />
       </map>
     </option>
   </component>

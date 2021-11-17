@@ -16,6 +16,7 @@
     <application
         android:icon="@drawable/icon"
         android:label="@string/app_name"
+        android:name="eu.lighthouselabs.obd.App"
         android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
         <activity android:name=".activity.PermissionActivity"
             android:screenOrientation="portrait">

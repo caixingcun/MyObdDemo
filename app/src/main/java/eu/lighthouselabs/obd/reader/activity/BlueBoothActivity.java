@@ -10,24 +10,33 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import eu.lighthouselabs.obd.reader.R;
@@ -38,7 +47,12 @@ public class BlueBoothActivity extends AppCompatActivity {
     Button btn;
     TextView tv;
     EditText et;
-
+    EditText etNameRegex;
+    Button btnSearch;
+    RecyclerView rv;
+    private BluetoothAdapter blueBoothAdapter;
+    private String deviceNameRegex = "";
+    private SimpleAdapter mAdapter;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -48,14 +62,64 @@ public class BlueBoothActivity extends AppCompatActivity {
         et = findViewById(R.id.et);
         tv = findViewById(R.id.tv);
         ll = findViewById(R.id.ll);
+        rv = findViewById(R.id.rv);
+        initRv();
+        etNameRegex = findViewById(R.id.et_name);
+        btnSearch = findViewById(R.id.btn_search);
         ll.setVisibility(View.INVISIBLE);
 
+        etNameRegex.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                deviceNameRegex = s.toString().trim();
+            }
+        });
         btn.setOnClickListener(v -> {
             String text = et.getText().toString();
             handerThread.send(text);
         });
 
-        BluetoothAdapter blueBoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
+
+        btnSearch.setOnClickListener(v -> {
+            startDiscoverBlueBoothDevices();
+        });
+    }
+
+    List<String> mList = new ArrayList<>();
+
+    private void initRv() {
+        rv.setLayoutManager(new LinearLayoutManager(this));
+        mAdapter = new SimpleAdapter(this, mList);
+        rv.setAdapter(mAdapter);
+        mAdapter.setRvListener(pos -> {
+            BluetoothDevice device = this.devices.get(mList.get(pos));
+            connectBlueTooth(device);
+        });
+    }
+
+    private void registerBlueDiscoveryReceive() {
+        //注册发现监听
+        registerReceiver(blueBoothReceiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
+        //注册状态变化
+        registerReceiver(blueBoothReceiver, new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED));
+        //注册 蓝牙设备搜索完成状态
+        registerReceiver(blueBoothReceiver, new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED));
+    }
+
+    private void startDiscoverBlueBoothDevices() {
+        blueBoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
         if (blueBoothAdapter == null) {
             toast("无蓝牙设备");
             return;
@@ -66,12 +130,7 @@ public class BlueBoothActivity extends AppCompatActivity {
             return;
         }
 
-        //注册发现监听
-        registerReceiver(blueBoothReceiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
-        //注册状态变化
-        registerReceiver(blueBoothReceiver, new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED));
-        //注册 蓝牙设备搜索完成状态
-        registerReceiver(blueBoothReceiver, new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED));
+        registerBlueDiscoveryReceive();
 
         //开启蓝牙搜索
         if (blueBoothAdapter.isDiscovering()) {
@@ -87,42 +146,31 @@ public class BlueBoothActivity extends AppCompatActivity {
             if (BluetoothDevice.ACTION_FOUND.equals(action)) {
                 //发现设备
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                short rssi = intent.getExtras().getShort(BluetoothDevice.EXTRA_RSSI);
                 String name = device.getName();
-                int status = device.getBondState();
-//                BluetoothDevice.BOND_BONDED; //已配对
-//                BluetoothDevice.BOND_BONDING; //配对中
-//                BluetoothDevice.BOND_NONE; //未配对或者取消
-                Log.d("tag", device.getName() + " " + device.getAddress());
-                if (device.getName() != null && device.getName().startsWith("DESKTOP-8")) {
-                    devices.put(device.getName() + "_" + device.getAddress(), device);
-                }
+                devices.put(name + ":" + device.getAddress(), device);
+                Log.d("tag", name + ":" + device.getAddress());
             } else if (BluetoothDevice.ACTION_BOND_STATE_CHANGED.equals(action)) {
-                toast("状态变化");
+                //状态变化
+                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                String name = device.getName();
+                devices.put(name + ":" + device.getAddress(), device);
+                Log.d("tag", name + ":" + device.getAddress());
+
             } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
                 toast("蓝牙设备搜索完成");
                 Log.d("tag", "蓝牙设备搜索完成");
-                showDeviceDialog();
+                List<String> temps = new ArrayList<>();
+                for (Map.Entry<String, BluetoothDevice> entry : devices.entrySet()) {
+                    if (entry.getKey().startsWith(deviceNameRegex)) {
+                        temps.add(entry.getKey());
+                    }
+                }
+                mList.clear();
+                mList.addAll(temps);
             }
         }
     };
 
-    /**
-     * 选择需要匹配的设备
-     */
-    private void showDeviceDialog() {
-        List<String> temps = new ArrayList<>();
-        for (Map.Entry<String, BluetoothDevice> entry : devices.entrySet()) {
-            temps.add(entry.getKey());
-        }
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("设备");
-        builder.setItems(temps.toArray(new String[temps.size()]), (dialog, which) -> {
-            BluetoothDevice device = devices.get(temps.get(which));
-            connectBlueTooth(device);
-        });
-        builder.show();
-    }
 
     private BlueToothConnectThread handerThread;
 
@@ -157,17 +205,7 @@ public class BlueBoothActivity extends AppCompatActivity {
                 toast("连接取消");
 
             }
-        }, new ReceiveCallback() {
-            @Override
-            public void receive(String msg) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        tv.setText(msg);
-                    }
-                });
-            }
-        });
+        }, msg -> runOnUiThread(() -> tv.setText(msg)));
         handerThread.start();
     }
 
@@ -180,6 +218,10 @@ public class BlueBoothActivity extends AppCompatActivity {
 
     public void toast(String msg) {
         new Handler(Looper.getMainLooper()).post(() -> Toast.makeText(BlueBoothActivity.this, msg, Toast.LENGTH_LONG).show());
+    }
+
+    public void setBtn(Button btn) {
+        this.btn = btn;
     }
 
 
@@ -296,5 +338,56 @@ public class BlueBoothActivity extends AppCompatActivity {
     public interface ReceiveCallback {
         void receive(String msg);
     }
+
+    public class SimpleAdapter extends RecyclerView.Adapter<MyViewHolder> {
+        private Context mContext;
+        private List<String> mList;
+        private MyRvListener rvListener;
+
+        public SimpleAdapter(Context context, List<String> list) {
+            this.mContext = context;
+            this.mList = list;
+        }
+
+        public void setRvListener(MyRvListener rvListener) {
+            this.rvListener = rvListener;
+        }
+
+        @NonNull
+        @Override
+        public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            View view = LayoutInflater.from(mContext).inflate(R.layout.item_simple, parent, false);
+            return new MyViewHolder(view);
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
+            holder.tv.setText(mList.get(position));
+            holder.tv.setOnClickListener(v -> {
+                if (rvListener != null) {
+                    rvListener.click(position);
+                }
+            });
+        }
+
+        @Override
+        public int getItemCount() {
+            return mList.size();
+        }
+    }
+
+    class MyViewHolder extends RecyclerView.ViewHolder {
+        private TextView tv;
+
+        public MyViewHolder(@NonNull View itemView) {
+            super(itemView);
+            tv = itemView.findViewById(R.id.tv);
+        }
+    }
+
+    public interface MyRvListener {
+        void click(int pos);
+    }
+
 }
 
