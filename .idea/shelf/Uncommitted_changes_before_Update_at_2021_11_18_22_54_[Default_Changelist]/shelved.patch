@@ -1,0 +1,18 @@
+Index: .idea/misc.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"DesignSurface\">\r\n    <option name=\"filePathToZoomLevelMap\">\r\n      <map>\r\n        <entry key=\"..\\:/Android/MyObdDemo/app/src/main/res/layout/activity_blue_booth.xml\" value=\"0.21875\" />\r\n        <entry key=\"..\\:/Android/MyObdDemo/app/src/main/res/layout/activity_permission.xml\" value=\"0.2803442028985507\" />\r\n        <entry key=\"..\\:/Android/MyObdDemo/app/src/main/res/layout/main.xml\" value=\"0.67\" />\r\n      </map>\r\n    </option>\r\n  </component>\r\n  <component name=\"ExternalStorageConfigurationManager\" enabled=\"true\" />\r\n  <component name=\"ProjectRootManager\" version=\"2\" languageLevel=\"JDK_11\" project-jdk-name=\"1.8\" project-jdk-type=\"JavaSDK\" />\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/misc.xml b/.idea/misc.xml
+--- a/.idea/misc.xml	
++++ b/.idea/misc.xml	
+@@ -5,6 +5,7 @@
+       <map>
+         <entry key="..\:/Android/MyObdDemo/app/src/main/res/layout/activity_blue_booth.xml" value="0.21875" />
+         <entry key="..\:/Android/MyObdDemo/app/src/main/res/layout/activity_permission.xml" value="0.2803442028985507" />
++        <entry key="..\:/Android/MyObdDemo/app/src/main/res/layout/command.xml" value="0.2015625" />
+         <entry key="..\:/Android/MyObdDemo/app/src/main/res/layout/main.xml" value="0.67" />
+       </map>
+     </option>

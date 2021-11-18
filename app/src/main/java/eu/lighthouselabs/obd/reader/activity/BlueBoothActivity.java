@@ -10,6 +10,7 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Message;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -24,12 +25,12 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -50,7 +51,7 @@ public class BlueBoothActivity extends AppCompatActivity {
     EditText etNameRegex;
     Button btnSearch;
     RecyclerView rv;
-    private BluetoothAdapter blueBoothAdapter;
+    private BluetoothAdapter blueBoothAdapter = BluetoothAdapter.getDefaultAdapter();
     private String deviceNameRegex = "";
     private SimpleAdapter mAdapter;
 
@@ -90,10 +91,18 @@ public class BlueBoothActivity extends AppCompatActivity {
         });
 
 
-
         btnSearch.setOnClickListener(v -> {
             startDiscoverBlueBoothDevices();
         });
+
+        Set<BluetoothDevice> bondedDevices = blueBoothAdapter.getBondedDevices();
+
+        for (BluetoothDevice bondedDevice : bondedDevices) {
+            if (bondedDevice.getAddress().equals("00:1A:7D:DA:71:13")) {
+                connectBlueTooth(bondedDevice);
+                return;
+            }
+        }
     }
 
     List<String> mList = new ArrayList<>();
@@ -109,17 +118,18 @@ public class BlueBoothActivity extends AppCompatActivity {
     }
 
     private void registerBlueDiscoveryReceive() {
+        IntentFilter intentFilter = new IntentFilter();
         //注册发现监听
-        registerReceiver(blueBoothReceiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
+        intentFilter.addAction(BluetoothDevice.ACTION_FOUND);
         //注册状态变化
-        registerReceiver(blueBoothReceiver, new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED));
+        intentFilter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
         //注册 蓝牙设备搜索完成状态
-        registerReceiver(blueBoothReceiver, new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED));
+        intentFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+
+        registerReceiver(blueBoothReceiver, intentFilter);
     }
 
     private void startDiscoverBlueBoothDevices() {
-        blueBoothAdapter = BluetoothAdapter.getDefaultAdapter();
-
         if (blueBoothAdapter == null) {
             toast("无蓝牙设备");
             return;
@@ -155,18 +165,9 @@ public class BlueBoothActivity extends AppCompatActivity {
                 String name = device.getName();
                 devices.put(name + ":" + device.getAddress(), device);
                 Log.d("tag", name + ":" + device.getAddress());
-
             } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
                 toast("蓝牙设备搜索完成");
                 Log.d("tag", "蓝牙设备搜索完成");
-                List<String> temps = new ArrayList<>();
-                for (Map.Entry<String, BluetoothDevice> entry : devices.entrySet()) {
-                    if (entry.getKey().startsWith(deviceNameRegex)) {
-                        temps.add(entry.getKey());
-                    }
-                }
-                mList.clear();
-                mList.addAll(temps);
             }
         }
     };
@@ -174,13 +175,24 @@ public class BlueBoothActivity extends AppCompatActivity {
 
     private BlueToothConnectThread handerThread;
 
+    private Handler handler = new Handler(Looper.getMainLooper()) {
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            if (msg.what == BlueToothConnectThread.WHAT_READ) {
+                toast((String) msg.obj);
+            }
+        }
+    };
+
+
+
     /**
      * 连接蓝牙设备
      *
      * @param device
      */
     private void connectBlueTooth(BluetoothDevice device) {
-        handerThread = new BlueToothConnectThread(device, new BlueToothConnectCallback() {
+        handerThread = new BlueToothConnectThread(handler, device, new BlueToothConnectCallback() {
             @Override
             public void connectSuccess(BluetoothSocket socket) {
                 toast("连接成功");
@@ -211,9 +223,14 @@ public class BlueBoothActivity extends AppCompatActivity {
 
 
     @Override
-    protected void onResume() {
-        super.onResume();
-
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(blueBoothReceiver);
+        if (blueBoothAdapter != null) {
+            if (blueBoothAdapter.isDiscovering()) {
+                blueBoothAdapter.cancelDiscovery();
+            }
+        }
     }
 
     public void toast(String msg) {
@@ -233,9 +250,13 @@ public class BlueBoothActivity extends AppCompatActivity {
         private Object lock = new Object();
         private BlueToothConnectCallback connectCallback;
         private ReceiveCallback receiveCallback;
+        private byte[] buffer = new byte[1024];
+        private Handler handler;
+        public static final int WHAT_READ = 1;
 
-        public BlueToothConnectThread(BluetoothDevice device, BlueToothConnectCallback callback, ReceiveCallback rCallback) {
+        public BlueToothConnectThread(Handler handler, BluetoothDevice device, BlueToothConnectCallback callback, ReceiveCallback rCallback) {
             try {
+                this.handler = handler;
                 connectCallback = callback;
                 bluetoothDevice = device;
                 receiveCallback = rCallback;
@@ -263,6 +284,22 @@ public class BlueBoothActivity extends AppCompatActivity {
                 if (connectCallback != null) {
                     connectCallback.connectSuccess(bluetoothSocket);
                 }
+
+                while (connected) {
+                    try {
+                        InputStream inputStream = bluetoothSocket.getInputStream();
+                        int read = inputStream.read(buffer);
+
+
+                        Message msg = Message.obtain(handler, WHAT_READ, read, -1, new String(buffer));
+                        msg.sendToTarget();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+
+                }
+
             } catch (IOException e) {
                 e.printStackTrace();
                 cancel();
